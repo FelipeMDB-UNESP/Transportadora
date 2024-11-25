@@ -33,8 +33,25 @@ class Entradas:
                 if self.P > self.A and self.A > self.C:
                     break
                 print("\nCondições iniciais não suportadas, refazendo as requisições...\n")
-    
 
+#'''TODO:
+# -Insertion Sort
+# -Class ponto_distribuicao
+# -Class pacote
+# -Class caminhao
+# -Threads:
+#   -ponto_distribuicao
+#   -pacote
+#   -caminhao'''
+
+def ponto_distribuicao(a):
+    print("\nPonto de Distribuicao:",a)
+
+def caminhao(a):
+    print("\nCaminhao:",a)
+
+def pacote(a):
+    print("\nPacote:",a)
 
 #main:
 
