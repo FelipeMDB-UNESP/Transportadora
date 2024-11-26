@@ -21,8 +21,11 @@ class Caminhao:
         return False
 
     #Método de descarregamento de encomendas
-    def descarregar(self, quantidade: int):
-        pass
+    def descarregar(self, origem: int):
+
+        for encomenda in self.encomendas:
+            if encomenda.destino == origem:
+                self.encomendas.remove(encomenda)
 
     #Método de listagem de encomendas
     def espacos_disponiveis(self):
