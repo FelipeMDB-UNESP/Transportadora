@@ -1,31 +1,46 @@
 class Caminhao:
-    def __init__(self, espacos_de_carga: int):
-        self.espacos_de_carga = espacos_de_carga
+    def __init__(self, capacidade: int):
+        self.capacidade = capacidade
+        self.encomendas = []
 
     def __str__(self):
-        return f'Caminhao com {self.espacos_de_carga} espaços de carga'
+        return f'Caminhao com capacidade para {self.capacidade} encomendas'
 
     def __repr__(self):
-        return f'Caminhao(espacos_de_carga={self.espacos_de_carga})'
+        return f'Caminhao(capacidade={self.capacidade})'
 
-    def carregar(self, quantidade: int):
-        if quantidade <= self.espacos_de_carga:
-            self.espacos_de_carga -= quantidade
+    def carregar(self, encomenda):
+        if isinstance(encomenda, Encomenda) and len(self.encomendas) < self.capacidade:
+            self.encomendas.append(encomenda)
             return True
         return False
 
     def descarregar(self, quantidade: int):
-        self.espacos_de_carga += quantidade
+        pass
 
-    def verificar_espacos(self):
-        return self.espacos_de_carga
+    def espacos_disponiveis(self):
+        return self.capacidade - len(self.encomendas)
 
+    def adicionar_encomenda(self, encomenda):
+        if isinstance(encomenda, Encomenda) and len(self.encomendas) < self.capacidade:
+            self.encomendas.append(encomenda)
+            return True
+        return False
+
+    def remover_encomenda(self, encomenda):
+        if encomenda in self.encomendas:
+            self.encomendas.remove(encomenda)
+
+    def listar_encomendas(self):
+        return self.encomendas
 
 class Encomenda:
-    def __init__(self, destino: str, nome: str, remetente: str):
+    def __init__(self, destino: str, nome: str, origem: str):
+        if destino == origem:
+            raise ValueError("Origem e destino não podem ser iguais")
         self.destino = destino
         self.nome = nome
-        self.remetente = remetente
+        self.remetente = origem
 
     def __str__(self):
         return f'Encomenda {self.nome} para {self.destino} de {self.remetente}'
@@ -42,3 +57,4 @@ class Encomenda:
     def atualizar_remetente(self, novo_remetente: str):
         self.remetente = novo_remetente
 
+    # ...existing code...
