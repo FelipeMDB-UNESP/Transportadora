@@ -2,7 +2,7 @@ import time
 import random
 import threading
 from enum import Enum, auto
-from classes import Caminhao, Encomenda, PontoDeRedistribuicao
+from classes import Caminhao, Encomenda, PontoDeDistribuicao
 
 # Enumerator para a seleção do ambiente de execução do Usuário
 class Ambiente(Enum):

@@ -66,18 +66,19 @@ class Encomenda:
 class Caminhao:
 
     #Construtor
-    def __init__(self, capacidade: int, id: int):
+    def __init__(self, capacidade: int, localizacao: int, id):
         self.capacidade = capacidade
+        self.localizacao = localizacao
         self.id = id
         self.encomendas = []
 
     #Método de impressão da capacidade da classe
     def __str__(self):
-        return f'Caminhao {self.id} com capacidade para {self.capacidade} encomendas'
+        return f'{self.id} com capacidade para {self.capacidade} encomendas'
 
     #Método de leitura de valores
     def __repr__(self):
-        return f'Caminhao(capacidade={self.capacidade}, id={self.id})'
+        return f'Caminhao(capacidade={self.capacidade}, localizacao={self.localizacao}, id={self.id})'
 
     #Método de listagem de encomendas
     def espacos_disponiveis(self):
@@ -110,7 +111,7 @@ class Caminhao:
     def listar_encomendas(self):
         return self.encomendas
 
-class PontoDeRedistribuicao:
+class PontoDeDistribuicao:
 
     #Construtor
     def __init__(self):
