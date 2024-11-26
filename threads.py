@@ -6,7 +6,7 @@ from caminhao import Caminhao
 from centro_distribuicao import CentroDistribuicao
 from entrada import Entrada, Ambiente
 
-def encomenda_thread(encomenda: Encomenda, centros: list, condition: threading.Condition, completed: threading.Event):
+def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], condition: threading.Condition, completed: threading.Event):
     centro_origem: CentroDistribuicao = centros[encomenda.origem]
     centro_destino: CentroDistribuicao = centros[encomenda.destino]
     centro_origem.adicionar_encomenda(encomenda)
@@ -34,31 +34,30 @@ def encomenda_thread(encomenda: Encomenda, centros: list, condition: threading.C
             print(f"Encomenda {encomenda.id} foi descarregada no centro de destino {centro_destino.id}")
             break
 
-def caminhao_thread(caminhao: Caminhao, centros: list, condition: threading.Condition, completed: threading.Event):
+def caminhao_thread(caminhao: Caminhao, centros: list[CentroDistribuicao], condition: threading.Condition, completed: threading.Event):
     while not completed.is_set():
         for centro in centros:
-            if not centro.fila_caminhoes.empty():
-                caminhao.esperando = True
-                centro.adicionar_caminhao_na_fila(caminhao)
-                print(f"Caminhão {caminhao.id} esperando no centro {centro.id}")
-                while caminhao.esperando and not completed.is_set():
-                    time.sleep(1)
-            else:
-                caminhao.esperando = False
-                while caminhao.espacos_disponiveis() > 0 and centro.encomendas:
-                    encomenda = centro.encomendas.pop(0)
-                    caminhao.adicionar_encomenda(encomenda)
-                    with condition:
-                        condition.notify_all()
-                    print(f"Encomenda {encomenda.id} carregada no caminhão {caminhao.id} no centro {centro.id}")
-                time.sleep(random.uniform(1, 3))  # Simular viagem
-                caminhao.localizacao = centro.id
-                print(f"Caminhão {caminhao.id} chegou ao centro {centro.id}")
+            with centro.lock:
+                if not centro.fila_caminhoes.empty():
+                    caminhao.esperando = True
+                    centro.adicionar_caminhao_na_fila(caminhao)
+                    print(f"Caminhão {caminhao.id} esperando no centro {centro.id}")
+                    while caminhao.esperando and not completed.is_set():
+                        time.sleep(1)
+                else:
+                    caminhao.esperando = False
+                    while caminhao.espacos_disponiveis() > 0 and centro.encomendas:
+                        encomenda = centro.encomendas.pop(0)
+                        caminhao.adicionar_encomenda(encomenda)
+                        with condition:
+                            condition.notify_all()
+                        print(f"Encomenda {encomenda.id} carregada no caminhão {caminhao.id} no centro {centro.id}")
+                    time.sleep(random.uniform(1, 3))  # Simular viagem
+                    caminhao.localizacao = centro.id
+                    print(f"Caminhão {caminhao.id} chegou ao centro {centro.id}")
         if all(not centro.encomendas and centro.fila_caminhoes.empty() for centro in centros):
             print(f"Caminhão {caminhao.id} finalizou suas entregas")
             break
-        #Percorre circularmente
-        centros.append(centros.pop(0))
     completed.set()
 
 if __name__ == "__main__":
