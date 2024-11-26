@@ -74,3 +74,24 @@ class Encomenda:
     def atualizar_remetente(self, nova_origem: str):
         self.origem = nova_origem
 
+class PontoDeRedistribuicao:
+    def __init__(self):
+        self.encomendas = []
+
+    def adicionar_encomenda(self, encomenda):
+        if isinstance(encomenda, Encomenda):
+            self.encomendas.append(encomenda)
+
+    def remover_encomenda(self, encomenda):
+        if encomenda in self.encomendas:
+            self.encomendas.remove(encomenda)
+
+    def listar_encomendas(self):
+        return self.encomendas
+
+    def __str__(self):
+        return f'Ponto de Redistribuição com {len(self.encomendas)} encomendas'
+
+    def __repr__(self):
+        return f'PontoDeRedistribuicao(encomendas={self.encomendas})'
+
