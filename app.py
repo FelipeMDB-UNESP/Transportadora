@@ -15,16 +15,18 @@ class Ambiente(Enum):
 #Classe de Entradas, contendo os valores iniciais do problema
 class Entradas:
 
-    
+    #Construtor da Classe
     def __init__(self, pontos_distribuicao, caminhoes, encomendas, capacidade_carga):
         self.S = pontos_distribuicao
         self.C = caminhoes
         self.P = encomendas
         self.A = capacidade_carga
-    
+
+    #Método de impressão da Classe
     def __str__(self):
         return str(f'\nEntradas:\n(S) Pontos de Distribuição: {self.S}\n(C) Caminhões: {self.C}\n(P) Encomendas: {self.P}\n(A) Capacidade de Carga: {self.A}\n')
 
+    #Método de leitura de valores, de acordo com o ambiente selecionado
     def leitura_valores(self, ambiente):
         if(ambiente is Ambiente.PROMPT):
             while(True):
@@ -49,9 +51,35 @@ class Entradas:
 
 def ponto_distribuicao(a):
     print("\nPonto de Distribuicao:",a)
+dado = 1
 
 def caminhao(a):
     print("\nCaminhao:",a)
+def ponto_distribuicao():
+    print("\nPonto de Distribuicao:")
+def caminhao():
+    global dado
+    semaforo.acquire(blocking=True)
+    mutex.acquire()
+    print("\nEntrega:" + str(dado))
+    dado = dado + 1
+    mutex.release()
+    semaforo.release()
+def pacote():
+    print("\nPacote:")
+mutex = threading.Lock()
+semaforo = threading.Semaphore()
+threads_caminhoes = []
+#Inicialização dos Threads
+for i in range(100):
+    thread = threading.Thread(target=caminhao)
+    thread.setName("Caminhao " + str(i))
+    threads_caminhoes.append(thread)
+    thread.start()
+#"Free" dos Threads
+for thread in threads_caminhoes:
+    print("\n" + thread.name + " liberado")
+    thread.join()
 
 def pacote(a):
     print("\nPacote:",a)
@@ -59,8 +87,10 @@ def pacote(a):
 #main:
 
 entradas = Entradas(3,4,6,5) #valores default para testes & inicialização do objeto
+#entradas = Entradas(3,4,6,5) #valores default para testes & inicialização do objeto
 
 #ambiente = Ambiente.PROMPT   #vide enumerator
 #entradas.leitura_valores(ambiente) #pede ao usuário preencher cada campo de entrada
 
 print(entradas)
+#print(entradas)
