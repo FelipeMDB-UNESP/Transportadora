@@ -9,6 +9,7 @@ class Caminhao:
         self.capacidade = capacidade
         self.localizacao = localizacao
         self.carga: List[Encomenda] = []
+        self.esperando = False
 
     def __str__(self):
         return f'{self.id} com capacidade para {self.capacidade} encomendas'

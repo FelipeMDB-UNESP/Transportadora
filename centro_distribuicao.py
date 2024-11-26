@@ -9,6 +9,7 @@ class CentroDistribuicao:
         self.encomendas = []
         self.fila_caminhoes = Queue()
         self.id = id
+        self.lock = threading.Lock()
 
     def __str__(self):
         return f'Ponto de Distribuição com {len(self.encomendas)} encomendas e {self.fila_caminhoes.qsize()} caminhões na fila'
