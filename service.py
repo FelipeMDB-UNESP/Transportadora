@@ -1,17 +1,58 @@
+import threading
+import sys
 from classes import Caminhao, Encomenda, PontoDeDistribuicao
 from app import Entradas
-import random
-import threading
 
-entradas = Entradas(3, 4, 6, 5)  # valores default para testes & inicialização do objeto
+# Funções para threads
+def ponto_distribuicao(id):
+    print(f"Ponto de Distribuicao {id}")
 
-pontos = [None for i in range(entradas.S)]
+def caminhao(id):
+    print(f"Caminhao {id}")
 
-random.seed()
+def encomenda(id):
+    print(f"Pacote {id}")
 
-for i in range(entradas.S):
-    pontos[i] = PontoDeDistribuicao()
+# main:
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Uso: python service.py <S> <C> <P> <A>")
+        sys.exit(1)
 
-def thread_caminhao():
+    S = int(sys.argv[1])
+    C = int(sys.argv[2])
+    P = int(sys.argv[3])
+    A = int(sys.argv[4])
 
-    caminhao = Caminhao(entradas.A, random.randint(1,entradas.S), threading.current_thread().name)
+    entradas = Entradas(S, C, P, A)
+    print(entradas)
+
+    mutex = threading.Lock()
+    semaforo = threading.Semaphore()
+    threads = []
+
+    # Criar threads para pontos de redistribuição
+    for i in range(S):
+        thread = threading.Thread(target=ponto_distribuicao, args=(i,))
+        thread.setName(f"PontoDeDistribuicao {i}")
+        threads.append(thread)
+        thread.start()
+
+    # Criar threads para caminhões
+    for i in range(C):
+        thread = threading.Thread(target=caminhao, args=(i,))
+        thread.setName(f"Caminhao {i}")
+        threads.append(thread)
+        thread.start()
+
+    # Criar threads para encomendas
+    for i in range(P):
+        thread = threading.Thread(target=encomenda, args=(i,))
+        thread.setName(f"Encomenda {i}")
+        threads.append(thread)
+        thread.start()
+
+    # "Free" dos Threads
+    for thread in threads:
+        print(f"{thread.name} liberado")
+        thread.join()
