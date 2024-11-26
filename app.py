@@ -49,20 +49,48 @@ class Entradas:
 #   -pacote
 #   -caminhao'''
 
-def ponto_distribuicao(a):
-    print("\nPonto de Distribuicao:",a)
+dado = 1
 
-def caminhao(a):
-    print("\nCaminhao:",a)
+def ponto_distribuicao():
+    print("\nPonto de Distribuicao:")
 
-def pacote(a):
-    print("\nPacote:",a)
+def caminhao():
+    global dado
+    semaforo.acquire(blocking=True)
+    mutex.acquire()
+    print("\nEntrega:" + str(dado))
+    dado = dado + 1
+    mutex.release()
+    semaforo.release()
+
+def pacote():
+    print("\nPacote:")
+
+mutex = threading.Lock()
+semaforo = threading.Semaphore()
+
+
+
+threads_caminhoes = []
+
+#Inicialização dos Threads
+for i in range(100):
+    thread = threading.Thread(target=caminhao)
+    thread.setName("Caminhao " + str(i))
+    threads_caminhoes.append(thread)
+    thread.start()
+
+#"Free" dos Threads
+for thread in threads_caminhoes:
+    print("\n" + thread.name + " liberado")
+    thread.join()
+
 
 #main:
 
-entradas = Entradas(3,4,6,5) #valores default para testes & inicialização do objeto
+#entradas = Entradas(3,4,6,5) #valores default para testes & inicialização do objeto
 
 #ambiente = Ambiente.PROMPT   #vide enumerator
 #entradas.leitura_valores(ambiente) #pede ao usuário preencher cada campo de entrada
 
-print(entradas)
+#print(entradas)
