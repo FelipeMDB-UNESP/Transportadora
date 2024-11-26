@@ -84,22 +84,18 @@ class Caminhao:
 
     #Método de carregamento de encomendas
     def carregar(self, encomenda: Encomenda):
-        
-        if self.espacos_disponiveis() > 0:
-            self.encomendas.append(encomenda)
-            return True
-        return False
+        return self.adicionar_encomenda(encomenda)
 
     #Método de descarregamento de encomendas
     def descarregar(self, origem: int):
 
         for encomenda in self.encomendas:
             if encomenda.destino == origem:
-                self.encomendas.remove(encomenda)
+                self.remover_encomenda(encomenda)
 
     #Método para adicionar encomendas
-    def adicionar_encomenda(self, encomenda):
-        if isinstance(encomenda, Encomenda) and len(self.encomendas) < self.capacidade:
+    def adicionar_encomenda(self, encomenda: Encomenda):
+        if self.espacos_disponiveis() > 0:
             self.encomendas.append(encomenda)
             return True
         return False
