@@ -1,21 +1,19 @@
 import threading
-import sys
-from classes import Caminhao, Encomenda, PontoDeDistribuicao
-from enum import Enum, auto
 import random
 import time
+from classes import Caminhao, Encomenda, PontoDeDistribuicao
+from enum import Enum, auto
+from typing import List
 
 
 encomendas_em_execucao = 0
-encomendas_em_execucao_lock = threading.Lock()
+#encomendas_em_execucao_lock = threading.Lock()
 
-# Enumerator para a seleção do ambiente de execução do Usuário
 class Ambiente(Enum):
     PROMPT = auto()
     APLICACAO = auto()
 
-# Classe de Entradas, contendo os valores iniciais do problema
-class Entradas:
+class Entrada:
     def __init__(self, pontos_distribuicao, caminhoes, encomendas, capacidade_carga):
         self.S = pontos_distribuicao
         self.C = caminhoes
@@ -23,7 +21,7 @@ class Entradas:
         self.A = capacidade_carga
 
     def __str__(self):
-        return str(f'\nEntradas:\n(S) Pontos de Distribuição: {self.S}\n(C) Caminhões: {self.C}\n(P) Encomendas: {self.P}\n(A) Capacidade de Carga: {self.A}\n')
+        return str(f'\nEntrada:\n(S) Pontos de Distribuição: {self.S}\n(C) Caminhões: {self.C}\n(P) Encomendas: {self.P}\n(A) Capacidade de Carga: {self.A}\n')
 
     def leitura_valores(self, ambiente):
         if ambiente is Ambiente.PROMPT:
@@ -40,18 +38,17 @@ class Entradas:
                 print("\nCondições iniciais não suportadas, refazendo as requisições...\n")
 
 
-# Funções para threads
 def ponto_distribuicao(id, pontos, tempo_inicial):
     print(f"Ponto de Distribuicao {id}")
-    ponto = pontos[id]
+    ponto:PontoDeDistribuicao = pontos[id]
     global encomendas_em_execucao
     while encomendas_em_execucao > 0:
         caminhao = ponto.processar_caminhao(id, tempo_inicial)
         if caminhao:
             print(f"Caminhao {caminhao.id} processado no Ponto de Distribuicao {id}")
 
-def caminhao(entradas, pontos):
-    caminhao = Caminhao(entradas.A, random.randint(0, entradas.S - 1), threading.current_thread().name)
+def caminhao(entrada:Entrada, pontos:List[PontoDeDistribuicao]):
+    caminhao = Caminhao(entrada.A, random.randint(0, entrada.S - 1), threading.current_thread().name)
     global encomendas_em_execucao
     while encomendas_em_execucao > 0:
         pontos[caminhao.localizacao].adicionar_caminhao(caminhao)
@@ -63,18 +60,18 @@ def caminhao(entradas, pontos):
         time.sleep(random.randint(1,1000) * 10E-5)
 
         caminhao.localizacao=caminhao.localizacao+1
-        if (caminhao.localizacao == entradas.S):
+        if (caminhao.localizacao == entrada.S):
             caminhao.localizacao = 0
 
 def encomenda(args,tempo_inicial):
     id = args['id']
-    entradas = args['entradas']
-    pontos = args['pontos']
+    entrada = args['entrada']
+    pontos:List[PontoDeDistribuicao] = args['pontos']
 
-    origem = random.randint(0, entradas.S - 1)
-    destino = random.randint(0, entradas.S - 1)
+    origem = random.randint(0, entrada.S - 1)
+    destino = random.randint(0, entrada.S - 1)
     while destino == origem:
-        destino = random.randint(0, entradas.S - 1)
+        destino = random.randint(0, entrada.S - 1)
     
     encomenda = Encomenda(origem, destino, threading.current_thread().name)
     pontos[origem].adicionar_encomenda(encomenda)
@@ -99,47 +96,36 @@ def encomenda(args,tempo_inicial):
 # S --> pontos de distribuição
 # main:
 if __name__ == "__main__":
-    # if len(sys.argv) != 5:
-    #     print("Uso: python service.py <S> <C> <P> <A>")
-    #     sys.exit(1)
 
-    # S = int(sys.argv[1])
-    # C = int(sys.argv[2])
-    # P = int(sys.argv[3])
-    # A = int(sys.argv[4])
-
-    entradas = Entradas(0, 0, 0, 0)
-    entradas.leitura_valores(Ambiente.PROMPT)
-    print(entradas)
+    entrada:Entrada = Entrada(0, 0, 0, 0)
+    entrada.leitura_valores(Ambiente.PROMPT)
+    print(entrada)
 
     semaforo = threading.Semaphore()
-    pontos = [PontoDeDistribuicao() for _ in range(entradas.S)]
+    pontos = [PontoDeDistribuicao() for _ in range(entrada.S)]
     threads_pontos_distribuicao = []
     threads_caminhoes = []
     threads_encomendas = []
     tempo_inicial = time.time()
 
-    # Criar threads para pontos de distribuição
-    for i in range(entradas.S):
+    for i in range(entrada.S):
         thread = threading.Thread(target=ponto_distribuicao, args=(i, pontos, tempo_inicial), name=f"PontoDeDistribuicao {i}")
         threads_pontos_distribuicao.append(thread)
         thread.start()
 
-    # Criar threads para caminhões
-    for i in range(entradas.C):
-        thread = threading.Thread(target=caminhao, args=(entradas, pontos), name=f"Caminhao {i}")
+    for i in range(entrada.C):
+        thread = threading.Thread(target=caminhao, args=(entrada, pontos), name=f"Caminhao {i}")
         threads_caminhoes.append(thread)
         thread.start()
 
-    # Criar threads para encomendas
-    for i in range(entradas.P):
-        args = {'id': i, 'entradas': entradas, 'pontos': pontos}
+    for i in range(entrada.P):
+        args = {'id': i, 'entrada': entrada, 'pontos': pontos}
         thread = threading.Thread(target=encomenda, args=(args,tempo_inicial), name=f"Encomenda {i}")
         threads_encomendas.append(thread)
         thread.start()
 
 
-    # # "Free" dos Threads
+    # "Free" dos Threads
     for thread in threads_encomendas + threads_caminhoes + threads_pontos_distribuicao:
         print(f"{thread.name} liberado")
         thread.join()
