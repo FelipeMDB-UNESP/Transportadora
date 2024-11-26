@@ -5,7 +5,7 @@ class Caminhao:
         self.capacidade = capacidade
         self.encomendas = []
 
-    #Método de impressão da Classe
+    #Método de impressão da capacidade da classe
     def __str__(self):
         return f'Caminhao com capacidade para {self.capacidade} encomendas'
 
@@ -75,23 +75,30 @@ class Encomenda:
         self.origem = nova_origem
 
 class PontoDeRedistribuicao:
+
+    #Construtor
     def __init__(self):
         self.encomendas = []
 
+    #Método de adicionar encomendas
     def adicionar_encomenda(self, encomenda):
         if isinstance(encomenda, Encomenda):
             self.encomendas.append(encomenda)
 
+    #Método de remover encomendas
     def remover_encomenda(self, encomenda):
         if encomenda in self.encomendas:
             self.encomendas.remove(encomenda)
 
+    #Método de listar encomendas
     def listar_encomendas(self):
         return self.encomendas
 
+    #Método de impressão da quantidade de encomendas
     def __str__(self):
         return f'Ponto de Redistribuição com {len(self.encomendas)} encomendas'
 
+    #Método de leitura de valores
     def __repr__(self):
         return f'PontoDeRedistribuicao(encomendas={self.encomendas})'
 
