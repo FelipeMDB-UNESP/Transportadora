@@ -6,22 +6,27 @@ from enum import auto
 
 
 #Enumerator para a seleção do ambiente de execução do Usuário
+#PROMPT o usuário coloca as entradas
+#APLICACAO as entradas são passadas pelo sistema
 class Ambiente(Enum):
     PROMPT = auto()
     APLICACAO = auto()
 
-
+#Classe de Entradas, contendo os valores iniciais do problema
 class Entradas:
 
+    #Construtor da Classe
     def __init__(self, pontos_distribuicao, caminhoes, encomendas, capacidade_carga):
         self.S = pontos_distribuicao
         self.C = caminhoes
         self.P = encomendas
         self.A = capacidade_carga
     
+    #Método de impressão da Classe
     def __str__(self):
         return str(f'\nEntradas:\n(S) Pontos de Distribuição: {self.S}\n(C) Caminhões: {self.C}\n(P) Encomendas: {self.P}\n(A) Capacidade de Carga: {self.A}\n')
 
+    #Método de leitura de valores, de acordo com o ambiente selecionado
     def leitura_valores(self, ambiente):
         if(ambiente is Ambiente.PROMPT):
             while(True):
