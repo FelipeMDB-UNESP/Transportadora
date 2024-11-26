@@ -1,3 +1,6 @@
+from queue import Queue
+import threading
+
 class Encomenda:
 
     #Construtor
@@ -111,31 +114,54 @@ class Caminhao:
     def listar_encomendas(self):
         return self.encomendas
 
-class PontoDeDistribuicao:
+    def get_capacidade(self):
+        return self.capacidade
 
-    #Construtor
+    def get_localizacao(self):
+        return self.localizacao
+
+    def get_nome(self):
+        return self.id
+
+    def set_capacidade(self, espacos_carga):
+        self.capacidade = espacos_carga
+
+    def set_localizacao(self, localizacao):
+        self.localizacao = localizacao
+
+    def set_nome(self, nome):
+        self.id = nome
+
+class PontoDeRedistribuicao:
     def __init__(self):
         self.encomendas = []
+        self.fila_caminhoes = Queue()
+        self.mutex = threading.Lock()
 
-    #Método de adicionar encomendas
-    def adicionar_encomenda(self, encomenda):
-        if isinstance(encomenda, Encomenda):
+    def __str__(self):
+        return f'Ponto de Redistribuição com {len(self.encomendas)} encomendas e {self.fila_caminhoes.qsize()} caminhões na fila'
+
+    def __repr__(self):
+        return f'PontoDeRedistribuicao(encomendas={self.encomendas}, fila_caminhoes={list(self.fila_caminhoes.queue)})'
+
+    def adicionar_encomenda(self, encomenda: Encomenda):
+        if encomenda not in self.encomendas:
             self.encomendas.append(encomenda)
+            return True
+        return False
 
-    #Método de remover encomendas
-    def remover_encomenda(self, encomenda):
+    def remover_encomenda(self, encomenda: Encomenda):
         if encomenda in self.encomendas:
             self.encomendas.remove(encomenda)
 
-    #Método de listar encomendas
     def listar_encomendas(self):
         return self.encomendas
 
-    #Método de impressão da quantidade de encomendas
-    def __str__(self):
-        return f'Ponto de Redistribuição com {len(self.encomendas)} encomendas'
+    def adicionar_caminhao(self, id_caminhao: str):
+        self.fila_caminhoes.put(id_caminhao)
 
-    #Método de leitura de valores
-    def __repr__(self):
-        return f'PontoDeRedistribuicao(encomendas={self.encomendas})'
+    def remover_caminhao(self):
+        if not self.fila_caminhoes.empty():
+            return self.fila_caminhoes.get()
+        return None
 
