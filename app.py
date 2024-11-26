@@ -59,12 +59,12 @@ def ponto_distribuicao():
     print("\nPonto de Distribuicao:")
 def caminhao():
     global dado
-    semaforo.acquire(blocking=True)
-    mutex.acquire()
+    semaforo.acquire(blocking=True) #decrementa
+    mutex.acquire() #incrementa
     print("\nEntrega:" + str(dado))
     dado = dado + 1
-    mutex.release()
-    semaforo.release()
+    mutex.release() #decrementa
+    semaforo.release()  #incrementa
 def pacote():
     print("\nPacote:")
 mutex = threading.Lock()
