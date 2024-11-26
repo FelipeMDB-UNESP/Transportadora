@@ -6,7 +6,7 @@ class Encomenda:
             raise ValueError("Origem e destino não podem ser iguais")
         self.destino = destino
         self.nome = nome
-        self.remetente = origem
+        self.origem = origem
         self.id_caminhao = None
         self.horario_chegada = None
         self.horario_carregamento = None
