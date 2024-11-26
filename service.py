@@ -29,30 +29,32 @@ if __name__ == "__main__":
 
     mutex = threading.Lock()
     semaforo = threading.Semaphore()
-    threads = []
+    threads_pontos = []
+    threads_caminhoes = []
+    threads_encomendas = []
 
     # Criar threads para pontos de redistribuição
     for i in range(S):
         thread = threading.Thread(target=ponto_distribuicao, args=(i,))
         thread.setName(f"PontoDeDistribuicao {i}")
-        threads.append(thread)
+        threads_pontos.append(thread)
         thread.start()
 
     # Criar threads para caminhões
     for i in range(C):
         thread = threading.Thread(target=caminhao, args=(i,))
         thread.setName(f"Caminhao {i}")
-        threads.append(thread)
+        threads_caminhoes.append(thread)
         thread.start()
 
     # Criar threads para encomendas
     for i in range(P):
         thread = threading.Thread(target=encomenda, args=(i,))
         thread.setName(f"Encomenda {i}")
-        threads.append(thread)
+        threads_encomendas.append(thread)
         thread.start()
 
     # "Free" dos Threads
-    for thread in threads:
+    for thread in threads_pontos + threads_caminhoes + threads_encomendas:
         print(f"{thread.name} liberado")
         thread.join()
