@@ -7,6 +7,10 @@ class Encomenda:
         self.destino = destino
         self.nome = nome
         self.remetente = origem
+        self.id_caminhao = None
+        self.horario_chegada = None
+        self.horario_carregamento = None
+        self.horario_descarregamento = None
 
     #Método de impressão da Classe
     def __str__(self):
@@ -16,17 +20,48 @@ class Encomenda:
     def __repr__(self):
         return f'Encomenda(destino={self.destino}, nome={self.nome}, origem={self.origem})'
 
-    #Método para atualizar o destino da encomenda
-    def atualizar_destino(self, novo_destino: str):
-        self.destino = novo_destino
+    # Métodos para manipular os atributos
+    def set_destino(self, destino):
+        self.destino = destino
 
-    #Método para atualizar o nome da encomenda
-    def atualizar_nome(self, novo_nome: str):
-        self.nome = novo_nome
+    def get_destino(self):
+        return self.destino
 
-    #Método para atualizar a origem da encomenda
-    def atualizar_remetente(self, nova_origem: str):
-        self.origem = nova_origem
+    def set_nome(self, nome):
+        self.nome = nome
+
+    def get_nome(self):
+        return self.nome
+
+    def set_remetente(self, remetente):
+        self.remetente = remetente
+
+    def get_remetente(self):
+        return self.remetente
+
+    def set_horario_chegada(self, horario):
+        self.horario_chegada = horario
+
+    def get_horario_chegada(self):
+        return self.horario_chegada
+
+    def set_horario_carregamento(self, horario):
+        self.horario_carregamento = horario
+
+    def get_horario_carregamento(self):
+        return self.horario_carregamento
+
+    def set_id_caminhao(self, id_caminhao):
+        self.id_caminhao = id_caminhao
+
+    def get_id_caminhao(self):
+        return self.id_caminhao
+
+    def set_horario_descarregamento(self, horario):
+        self.horario_descarregamento = horario
+
+    def get_horario_descarregamento(self):
+        return self.horario_descarregamento
 
 class Caminhao:
 
