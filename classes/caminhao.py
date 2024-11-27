@@ -10,7 +10,6 @@ class Caminhao:
         self.capacidade = capacidade
         self.localizacao = localizacao
         self.carga: List[Encomenda] = []
-        self.esperando = False
 
     #Método para consumir tempo entre pontos de distribuicao
     def estrada():
