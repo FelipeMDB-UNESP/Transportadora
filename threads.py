@@ -1,4 +1,5 @@
 import time
+import pygame
 import random
 import threading
 from classes.caminhao import Caminhao
@@ -132,7 +133,100 @@ if __name__ == "__main__":
     if len(threads) != len(encomendas) + len(caminhoes):
         raise RuntimeError(f"Expected {len(encomendas) + len(caminhoes)} total threads, but created {len(threads)}")
 
-    all_delivered.wait()
-    for t in threads:
-        t.join()
-        print(f"Thread {t.name} finalizada")
+
+    #Parte da Iteracao por tela:
+
+    pygame.init()
+
+    # Cores em RGB
+    white = (200, 200, 200)
+    black = (0, 0, 0)
+    green = (0, 63, 0)
+    blue = (0, 0, 128)
+    brown = (60, 30, 0)
+
+    # Tamanho da tela
+    X = 600
+    Y = 600
+
+    # Criacao da tela
+    display_surface = pygame.display.set_mode((X, Y))
+    pygame.display.set_caption('Tela de Acompanhamento')
+
+    # Definicao de fonte e tamanho
+    font = pygame.font.Font('freesansbold.ttf', 18)
+
+    #Variaveis da tela
+    text_encomendas = [None for _ in range(entrada.P)]
+
+    posicao_vertical_anterior = -1
+    posicao_vertical = 0
+    posicao_horizontal = 0
+    tempo_iteracao = 0
+
+    # infinite loop
+    while True:
+
+
+        # completely fill the surface object
+        # with white color
+        display_surface.fill(brown)
+
+        # copying the text surface object
+        # to the display surface object
+        if posicao_vertical<0:
+            posicao_vertical = 0
+
+        if posicao_horizontal>0:
+            posicao_horizontal = 0
+
+        for i in range(posicao_vertical, posicao_vertical+20):
+            if i < entrada.P:
+
+                if posicao_vertical != posicao_vertical_anterior or int(time.time()-tempo_iteracao) > 1:
+                    
+                    extra = encomendas[i].localizar_encomenda()
+                    text = font.render(f'Encomenda {i}:  {encomendas[i].status.value}    {extra}', True, white)
+                    text_encomendas[i] = text
+                    
+                display_surface.blit(text_encomendas[i], (10 + posicao_horizontal * 50, 5 + (i-posicao_vertical)*30))
+        
+        if posicao_vertical != posicao_vertical_anterior or int(time.time()-tempo_iteracao) > 1:
+            tempo_iteracao = time.time()
+
+        posicao_vertical_anterior = posicao_vertical
+
+        # iterate over the list of Event objects
+        # that was returned by pygame.event.get() method.
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_DOWN:
+                    posicao_vertical += 1
+                if event.key == pygame.K_UP:
+                    posicao_vertical -= 1
+                if event.key == pygame.K_LEFT:
+                    posicao_horizontal +=1
+                if event.key == pygame.K_RIGHT:
+                    posicao_horizontal -=1
+
+            # if event object type is QUIT
+            # then quitting the pygame
+            # and program both.
+            if event.type == pygame.QUIT:
+
+                all_delivered.wait()
+                for t in threads:
+                    t.join()
+                    print(f"Thread {t.name} finalizada")
+
+                # deactivates the pygame library
+                pygame.quit()
+
+                # quit the program.
+                quit()
+
+        # Draws the surface object to the screen.
+        pygame.display.update()

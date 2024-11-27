@@ -38,6 +38,22 @@ class Encomenda:
         with open('rastro.txt', 'a') as arquivo:
             arquivo.write(f'\nEncomenda {self.id}:\nProduto: {self.nome}\nOrigem: Ponto de Distribuicao {self.origem}\nDestino: Ponto de Distribuicao {self.destino}\nHorario de Producao: {trecho_producao}\nHorario de Carregamento: {trecho_carregamento} - Caminhao {self.nome_caminhao}\nHorario de Despacho: {trecho_despacho} - Caminhao {self.nome_caminhao}\n')
 
+    def localizar_encomenda(self):
+        if self.status is StatusEncomenda.PRODUZIDA:
+            return f'<- Centro de Distribuicao {self.origem}'
+
+        if self.status is StatusEncomenda.ENTREGUE:
+            return f'-> Centro de Distribuicao {self.destino}'
+        
+        if self.status is StatusEncomenda.TRANSPORTE:
+            return f'-- Caminhao {self.nome_caminhao}'
+        
+        if self.status is StatusEncomenda.CARREGADA:
+            return f'-> Caminhao {self.nome_caminhao}'
+        
+        if self.status is StatusEncomenda.DESPACHE:
+            return f'<- Caminhao {self.nome_caminhao}'
+
     #Método de impressão da Classe
     def __str__(self):
         return f'- {self.nome}'
