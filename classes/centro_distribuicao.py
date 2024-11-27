@@ -1,8 +1,8 @@
 import time
 import threading
 from queue import Queue
-from encomenda import Encomenda
-from caminhao import Caminhao
+from classes.encomenda import Encomenda
+from classes.caminhao import Caminhao
 
 class CentroDistribuicao:
     def __init__(self, id: str):

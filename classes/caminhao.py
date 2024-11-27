@@ -1,7 +1,7 @@
 import time
 import random
 from typing import List
-from encomenda import Encomenda
+from classes.encomenda import Encomenda
 
 class Caminhao:
 
