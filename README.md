@@ -24,7 +24,7 @@ Este projeto simula um sistema de logística utilizando threads para representar
 1. Certifique-se de que os arquivos das classes mencionados acima estão no diretório correto.
 2. Execute o script principal:
    ```bash
-   python <nome_do_arquivo>.py
+   python threads.py
 3. Durante a execução, o programa exibirá logs no terminal e salvará um histórico das encomendas no arquivo `rastro.txt`.
 
 ### Estrutura do Código
@@ -176,4 +176,108 @@ Encomenda [1] foi descarregada no centro de destino [3] pelo caminhão [2]
 - Esses logs ajudam a acompanhar cada passo do processo, desde a notificação para aguardar até a entrega final da encomenda.
 
 
+---
 
+## Explicação do Código: `caminhao_thread`
+
+A função `caminhao_thread` gerencia o comportamento de um caminhão em um sistema de transporte de encomendas. Ela coordena o carregamento, transporte e entrega de encomendas, além de lidar com a espera em filas de centros de distribuição.
+
+---
+
+### **1. Inicialização da Localização**
+```python
+i = caminhao.localizacao 
+```
+
+- A localização inicial do caminhão é armazenada no índice i.
+
+### **2. Laço Principal**
+```python
+while True:
+```
+- Um laço infinito controla a execução contínua do caminhão enquanto houver tarefas pendentes.
+
+### **3. Bloqueio do Centro de Distribuição**
+```python
+with centros[i].lock:
+```
+- Garante exclusividade no acesso ao centro de distribuição atual (centros[i]) para evitar conflitos entre threads.
+
+### **4. Verificar Fila de Caminhões**
+```python
+if not centros[i].fila_caminhoes.empty():
+    caminhao.esperando = True
+    centros[i].adicionar_caminhao_na_fila(caminhao)
+    print(f"Caminhão [{caminhao.id}] esperando no centro [{centros[i].id}]")
+    while caminhao.esperando:
+        time.sleep(1)
+```
+- Se houver fila no centro de distribuição:
+
+    1. O caminhão é marcado como esperando.
+    2. É adicionado à fila de caminhões do centro.
+    3. Um log é exibido para informar que o caminhão está aguardando.
+    4. O caminhão espera na fila até ser liberado.
+
+### **5. Carregamento de Encomendas**
+```python
+else:
+    caminhao.esperando = False
+
+    while caminhao.espacos_disponiveis() > 0 and centros[i].encomendas:
+        encomenda = centros[i].encomendas.pop(0)
+        caminhao.adicionar_encomenda(encomenda, tempo_inicial)
+        time.sleep(random.randint(1, 5))
+
+        with condition:
+            condition.notify_all()
+        print(f"Encomenda [{encomenda.id}] carregada no caminhão [{caminhao.id}] no centro [{centros[i].id}]")
+```
+- Caso não haja fila:
+
+    1. O caminhão é liberado (esperando = False).
+    2. Enquanto houver espaço disponível e encomendas no centro:
+        - Uma encomenda é retirada do centro e adicionada ao caminhão.
+        - Um atraso aleatório é simulado para o carregamento.
+        - Notifica outras threads de que o caminhão carregou uma encomenda.
+        - Um log é exibido informando o carregamento.
+
+### **6. Transporte**
+```python
+Caminhao.estrada()  # Simular viagem
+caminhao.localizacao = centros[i].id
+print(f"Caminhão [{caminhao.id}] chegou ao centro [{centros[i].id}]")
+```
+- O caminhão simula o transporte para o próximo centro de distribuição e sua localização é atualizada.
+
+### **7. Verificar Fim das Entregas**
+```python
+if all(not centro.encomendas and centro.fila_caminhoes.empty() for centro in centros) and not caminhao.carga:
+    print(f"Caminhão [{caminhao.id}] finalizou suas entregas")
+    break
+```
+- Verifica se:
+
+    - Todos os centros estão sem encomendas.
+    - Não há fila de caminhões.
+    - O caminhão está vazio.
+
+- Se as condições forem verdadeiras, o caminhão finaliza suas atividades e encerra a thread.
+
+### **8. Atualizar Rota**
+```python
+if i < len(centros) - 1:
+    i = i + 1
+else:
+    i = 0
+```
+
+- Atualiza a rota do caminhão para o próximo centro de distribuição, reiniciando o ciclo ao alcançar o último centro.
+
+### **9. Sinalizar Fim do Processo**
+```python
+if all(not centro.encomendas for centro in centros):
+    all_delivered.set()
+```
+
+- Se todos os centros estiverem sem encomendas, sinaliza a conclusão do processo definindo o evento all_delivered.
