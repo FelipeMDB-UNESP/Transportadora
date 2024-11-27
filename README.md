@@ -13,6 +13,7 @@ Este projeto simula um sistema de logística utilizando threads para representar
 ## Requisitos
 
 - Python 3.9 ou superior
+- Pygame (para visualização gráfica)
 - Classes definidas nos seguintes arquivos:
   - `classes/caminhao.py`
   - `classes/encomenda.py`
