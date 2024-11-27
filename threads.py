@@ -23,12 +23,13 @@ def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], co
     while encomenda.id_caminhao is not None:
 
         print(f"Encomenda {encomenda.id} está sendo transportada pelo caminhão {encomenda.id_caminhao}")
-        time.sleep(random.uniform(1, 3))  # Simular viagem
+        caminhao.estrada()  # Simular viagem
 
         for caminhao in caminhoes:
 
             if caminhao.id == encomenda.id_caminhao and caminhao.localizacao == centro_destino.id:
                 centro_destino.remover_encomenda(encomenda)
+                time.sleep(random.randint(1,1000) * 10E-3)
                 encomenda.horario_despacho = int((time.time() - tempo_inicial) * 1000)
                 encomenda.anotar_rastro()
                 caminhao.remover_encomenda(encomenda)
@@ -64,6 +65,7 @@ def caminhao_thread(caminhao: Caminhao, centros: list[CentroDistribuicao], condi
                     while caminhao.espacos_disponiveis() > 0 and centro.encomendas:
                         encomenda = centro.encomendas.pop(0)
                         caminhao.adicionar_encomenda(encomenda,tempo_inicial)
+                        time.sleep(random.randint(1,1000) * 10E-3)
 
                         with condition:
                             condition.notify_all()

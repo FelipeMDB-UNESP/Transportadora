@@ -14,7 +14,7 @@ class Caminhao:
 
     #Método para consumir tempo entre pontos de distribuicao
     def estrada(self):
-        time.sleep(random.uniform(1, 3))
+        time.sleep(random.randint(1,5000) * 10E-3)
 
     def espacos_disponiveis(self):
         return self.capacidade - len(self.carga)
