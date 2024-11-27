@@ -54,14 +54,12 @@ def thread_caminhao(caminhao: Caminhao, centros: list[CentroDistribuicao], condi
             caminhao.localizacao = centros[atual].id
 
             if not centros[atual].fila_caminhoes.empty():
-                caminhao.esperando = True
                 centros[atual].adicionar_caminhao_na_fila(caminhao)
                 print(f"Caminhão [{caminhao.id}] esperando no centro [{centros[atual].id}]")
                 while caminhao.esperando:
                     time.sleep(1)
 
             else:
-                caminhao.esperando = False
 
                 while caminhao.espacos_disponiveis() > 0 and centros[atual].encomendas:
                     time.sleep(random.randint(1,5))
