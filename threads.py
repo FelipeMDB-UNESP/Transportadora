@@ -88,7 +88,7 @@ def caminhao_thread(caminhao: Caminhao, centros: list[CentroDistribuicao], condi
 
 if __name__ == "__main__":
     entrada = Entradas(5, 5, 100, 6)
-    entrada.leitura_valores(Ambiente.TESTE)
+    entrada.leitura_valores(Ambiente.PROMPT)
     print(entrada)
 
     global tempo_inicial
