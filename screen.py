@@ -1,5 +1,5 @@
+import time
 import pygame
-import threading
 from threads import Entradas
 from classes.encomenda import StatusEncomenda, Encomenda
 
@@ -51,6 +51,7 @@ text_encomendas = [None for _ in range(entrada.P)]
 posicao_vertical_anterior = -1
 posicao_vertical = 0
 posicao_horizontal = 0
+tempo_iteracao = 0
 
 encomenda = Encomenda(1,2,"Feijao", 7)
 
@@ -73,13 +74,18 @@ while True:
 	for i in range(posicao_vertical, posicao_vertical+20):
 		if i < entrada.P:
 
-			if posicao_vertical != posicao_vertical_anterior:
-
+			if posicao_vertical != posicao_vertical_anterior or int(time.time()-tempo_iteracao) > 3:
+				
 				extra = localizar_encomenda(encomenda)
 				text = font.render(f'Encomenda {i}:  {encomenda.status.value}    {extra}', True, white)
 				text_encomendas[i] = text
+				
 			display_surface.blit(text_encomendas[i], (10 + posicao_horizontal * 50, 5 + (i-posicao_vertical)*30))
 	
+	if posicao_vertical != posicao_vertical_anterior or int(time.time()-tempo_iteracao) > 3:
+		tempo_iteracao = time.time()
+
+	posicao_vertical_anterior = posicao_vertical
 
 	# iterate over the list of Event objects
 	# that was returned by pygame.event.get() method.
@@ -89,10 +95,8 @@ while True:
 		if event.type == pygame.KEYDOWN:
 
 			if event.key == pygame.K_DOWN:
-				posicao_vertical_anterior = posicao_vertical
 				posicao_vertical += 1
 			if event.key == pygame.K_UP:
-				posicao_vertical_anterior = posicao_vertical
 				posicao_vertical -= 1
 			if event.key == pygame.K_LEFT:
 				posicao_horizontal +=1
