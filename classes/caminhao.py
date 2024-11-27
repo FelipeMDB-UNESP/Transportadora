@@ -14,7 +14,7 @@ class Caminhao:
 
     #Método para consumir tempo entre pontos de distribuicao
     def estrada(self):
-        time.sleep(random.randint(1,1024) * 10E-6)
+        time.sleep(random.uniform(1, 3))
 
     def espacos_disponiveis(self):
         return self.capacidade - len(self.carga)
@@ -33,13 +33,11 @@ class Caminhao:
             encomenda.nome_caminhao = self.id
             encomenda.horario_carregamento = int((time.time() - tempo_inicial) * 1000)
             self.carga.append(encomenda)
-            print(f"Encomenda {encomenda.id} foi adicionada ao caminhao {self.id}")
             return encomenda
         return None
 
     def remover_encomenda(self, encomenda: Encomenda):
         if encomenda in self.carga:
-            print(f"Encomenda {encomenda.id} foi removida do caminhao {self.id}")
             return self.carga.remove(encomenda)
         return None
     
