@@ -16,7 +16,6 @@ class CentroDistribuicao:
         if encomenda not in self.encomendas:
             self.encomendas.append(encomenda)
             encomenda.horario_producao = int((time.time() - tempo_inicial) * 1000)
-            print(f"Encomenda {encomenda.id} foi registrada no centro {self.id}")
             return True
         return False
     
