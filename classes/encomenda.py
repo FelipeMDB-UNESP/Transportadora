@@ -12,8 +12,19 @@ class Encomenda:
         self.horario_despacho = None                        #horario de descarregamento da encomenda no destino
 
     def anotar_rastro(self):
+
+        trecho_producao = f'{self.horario_producao}ms'
+        trecho_carregamento = f'{self.horario_carregamento}ms'
+        trecho_despacho = f'{self.horario_despacho}ms'
+
+        if self.horario_producao > 999:
+            trecho_producao = str(int(self.horario_producao/1000)) + "s"
+        if self.horario_carregamento > 999:
+            trecho_carregamento = str(int(self.horario_carregamento/1000)) + "s"
+        if self.horario_despacho > 999:
+            trecho_despacho = str(int(self.horario_despacho/1000)) + "s"
         with open('rastro.txt', 'a') as arquivo:
-            arquivo.write(f'\nEncomenda {self.id}:\nProduto: {self.nome}\nOrigem: Ponto de Distribuicao {self.origem}\nDestino: Ponto de Distribuicao {self.destino}\nHorario de Producao: {self.horario_producao}ms\nHorario de Carregamento: {self.horario_carregamento}ms - Caminhao {self.nome_caminhao}\nHorario de Despacho: {self.horario_despacho}ms - Caminhao {self.nome_caminhao}\n')
+            arquivo.write(f'\nEncomenda {self.id}:\nProduto: {self.nome}\nOrigem: Ponto de Distribuicao {self.origem}\nDestino: Ponto de Distribuicao {self.destino}\nHorario de Producao: {trecho_producao}\nHorario de Carregamento: {trecho_carregamento} - Caminhao {self.nome_caminhao}\nHorario de Despacho: {trecho_despacho} - Caminhao {self.nome_caminhao}\n')
 
     #Método de impressão da Classe
     def __str__(self):
