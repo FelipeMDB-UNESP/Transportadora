@@ -16,20 +16,20 @@ def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], co
         print(f"Encomenda {encomenda.id} adicionada ao centro de origem {centro_origem.id}")
     
     with condition:
+        print(f"Encomenda {encomenda.id} foi notificada para aguardar")
         while encomenda.id_caminhao is None:
             condition.wait()
-            print(f"Encomenda {encomenda.id} foi notificada para aguardar")
 
+    print(f"Encomenda {encomenda.id} está sendo transportada pelo caminhão {encomenda.id_caminhao}")
     while encomenda.id_caminhao is not None:
 
-        print(f"Encomenda {encomenda.id} está sendo transportada pelo caminhão {encomenda.id_caminhao}")
-        caminhao.estrada()  # Simular viagem
+        Caminhao.estrada()  # Simular viagem
 
         for caminhao in caminhoes:
 
             if caminhao.id == encomenda.id_caminhao and caminhao.localizacao == centro_destino.id:
                 centro_destino.remover_encomenda(encomenda)
-                time.sleep(random.randint(1,1000) * 10E-3)
+                time.sleep(random.randint(1,5))
                 encomenda.horario_despacho = int((time.time() - tempo_inicial) * 1000)
                 encomenda.anotar_rastro()
                 caminhao.remover_encomenda(encomenda)
@@ -46,44 +46,49 @@ def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], co
 
 def caminhao_thread(caminhao: Caminhao, centros: list[CentroDistribuicao], condition: threading.Condition, all_delivered: threading.Event):
 
+    i = caminhao.localizacao
+
     while True:
 
-        for centro in centros:
+        with centros[i].lock:
 
-            with centro.lock:
+            if not centros[i].fila_caminhoes.empty():
+                caminhao.esperando = True
+                centros[i].adicionar_caminhao_na_fila(caminhao)
+                print(f"Caminhão {caminhao.id} esperando no centro {centros[i].id}")
+                while caminhao.esperando:
+                    time.sleep(1)
 
-                if not centro.fila_caminhoes.empty():
-                    caminhao.esperando = True
-                    centro.adicionar_caminhao_na_fila(caminhao)
-                    print(f"Caminhão {caminhao.id} esperando no centro {centro.id}")
-                    while caminhao.esperando:
-                        time.sleep(1)
+            else:
+                caminhao.esperando = False
 
-                else:
-                    caminhao.esperando = False
+                while caminhao.espacos_disponiveis() > 0 and centros[i].encomendas:
+                    encomenda = centros[i].encomendas.pop(0)
+                    caminhao.adicionar_encomenda(encomenda,tempo_inicial)
+                    time.sleep(random.randint(1,5))
 
-                    while caminhao.espacos_disponiveis() > 0 and centro.encomendas:
-                        encomenda = centro.encomendas.pop(0)
-                        caminhao.adicionar_encomenda(encomenda,tempo_inicial)
-                        time.sleep(random.randint(1,1000) * 10E-3)
-
-                        with condition:
-                            condition.notify_all()
-                        print(f"Encomenda {encomenda.id} carregada no caminhão {caminhao.id} no centro {centro.id}")
-                    caminhao.estrada()  # Simular viagem
-                    caminhao.localizacao = centro.id
-                    print(f"Caminhão {caminhao.id} chegou ao centro {centro.id}")
-
+                    with condition:
+                        condition.notify_all()
+                    print(f"Encomenda {encomenda.id} carregada no caminhão {caminhao.id} no centro {centros[i].id}")
+                Caminhao.estrada()  # Simular viagem
+                caminhao.localizacao = centros[i].id
+                print(f"Caminhão {caminhao.id} chegou ao centro {centros[i].id}")
+            
         if all(not centro.encomendas and centro.fila_caminhoes.empty() for centro in centros) and not caminhao.carga:
             print(f"Caminhão {caminhao.id} finalizou suas entregas")
             break
+
+        if i < len(centros)-1:
+            i = i+1
+        else:
+            i=0
         
     if all(not centro.encomendas for centro in centros):
         all_delivered.set()
 
 
 if __name__ == "__main__":
-    entrada = Entradas(3, 5, 20, 10)
+    entrada = Entradas(5, 5, 100, 6)
     entrada.leitura_valores(Ambiente.TESTE)
     print(entrada)
 
