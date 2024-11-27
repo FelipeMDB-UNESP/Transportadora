@@ -1,12 +1,12 @@
-import threading
-import random
 import time
+import random
+import threading
 from classes.caminhao import Caminhao
-from classes.encomenda import Encomenda
-from classes.centro_distribuicao import CentroDistribuicao
+from classes.encomenda import Encomenda, StatusEncomenda
 from classes.entradas import Entradas, Ambiente
+from classes.centro_distribuicao import CentroDistribuicao
 
-def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], condition: threading.Condition, all_delivered: threading.Event):
+def thread_encomenda(encomenda: Encomenda, centros: list[CentroDistribuicao], condition: threading.Condition, all_delivered: threading.Event):
 
     centro_origem: CentroDistribuicao = centros[encomenda.origem]
     centro_destino: CentroDistribuicao = centros[encomenda.destino]
@@ -21,14 +21,15 @@ def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], co
             condition.wait()
 
     print(f"Encomenda [{encomenda.id}] está sendo transportada pelo caminhão [{encomenda.id_caminhao}]")
-    while encomenda.id_caminhao is not None:
+    encomenda.status = StatusEncomenda.TRANSPORTE
+    Caminhao.estrada()  # Simular viagem
 
-        Caminhao.estrada()  # Simular viagem
+    while encomenda.id_caminhao is not None:
 
         for caminhao in caminhoes:
 
             if caminhao.id == encomenda.id_caminhao and caminhao.localizacao == centro_destino.id:
-                centro_destino.remover_encomenda(encomenda)
+                encomenda.status = StatusEncomenda.DESPACHE
                 time.sleep(random.randint(1,5))
                 encomenda.horario_despacho = int((time.time() - tempo_inicial) * 1000)
                 encomenda.anotar_rastro()
@@ -40,50 +41,48 @@ def encomenda_thread(encomenda: Encomenda, centros: list[CentroDistribuicao], co
                 print(f"Encomenda [{encomenda.id}] foi descarregada no centro de destino [{centro_destino.id}] pelo caminhão [{caminhao.id}]")
                 break
 
-        if encomenda.id_caminhao is None:
-            break
+def thread_caminhao(caminhao: Caminhao, centros: list[CentroDistribuicao], condition: threading.Condition, all_delivered: threading.Event):
 
-def caminhao_thread(caminhao: Caminhao, centros: list[CentroDistribuicao], condition: threading.Condition, all_delivered: threading.Event):
-
-    i = caminhao.localizacao
+    atual = caminhao.localizacao
 
     while True:
 
-        with centros[i].lock:
+        print(f"Caminhão [{caminhao.id}] chegou ao centro [{centros[atual].id}]")
+        with centros[atual].lock:
 
-            if not centros[i].fila_caminhoes.empty():
+            caminhao.localizacao = centros[atual].id
+
+            if not centros[atual].fila_caminhoes.empty():
                 caminhao.esperando = True
-                centros[i].adicionar_caminhao_na_fila(caminhao)
-                print(f"Caminhão [{caminhao.id}] esperando no centro [{centros[i].id}]")
+                centros[atual].adicionar_caminhao_na_fila(caminhao)
+                print(f"Caminhão [{caminhao.id}] esperando no centro [{centros[atual].id}]")
                 while caminhao.esperando:
                     time.sleep(1)
 
             else:
                 caminhao.esperando = False
 
-                while caminhao.espacos_disponiveis() > 0 and centros[i].encomendas:
-                    encomenda = centros[i].encomendas.pop(0)
-                    caminhao.adicionar_encomenda(encomenda,tempo_inicial)
+                while caminhao.espacos_disponiveis() > 0 and centros[atual].encomendas:
                     time.sleep(random.randint(1,5))
+                    encomenda = centros[atual].encomendas.pop(0)
+                    encomenda.status = StatusEncomenda.CARREGADA
+                    caminhao.adicionar_encomenda(encomenda,tempo_inicial)
 
                     with condition:
                         condition.notify_all()
-                    print(f"Encomenda [{encomenda.id}] carregada no caminhão [{caminhao.id}] no centro [{centros[i].id}]")
+                    print(f"Encomenda [{encomenda.id}] carregada no caminhão [{caminhao.id}] no centro [{centros[atual].id}]")
                 Caminhao.estrada()  # Simular viagem
-                caminhao.localizacao = centros[i].id
-                print(f"Caminhão [{caminhao.id}] chegou ao centro [{centros[i].id}]")
             
         if all(not centro.encomendas and centro.fila_caminhoes.empty() for centro in centros) and not caminhao.carga:
             print(f"Caminhão [{caminhao.id}] finalizou suas entregas")
             break
 
-        if i < len(centros)-1:
-            i = i+1
+        if atual < len(centros)-1:
+            atual = atual+1
         else:
-            i=0
+            atual=0
         
-    if all(not centro.encomendas for centro in centros):
-        all_delivered.set()
+    all_delivered.set()
 
 
 if __name__ == "__main__":
@@ -115,7 +114,7 @@ if __name__ == "__main__":
 
     # Create threads for encomendas
     for encomenda in encomendas:
-        t = threading.Thread(target=encomenda_thread, args=(encomenda, centros, condition, all_delivered))
+        t = threading.Thread(target=thread_encomenda, args=(encomenda, centros, condition, all_delivered))
         threads.append(t)
         t.start()
 
@@ -125,7 +124,7 @@ if __name__ == "__main__":
 
     # Create threads for caminhoes
     for caminhao in caminhoes:
-        t = threading.Thread(target=caminhao_thread, args=(caminhao, centros, condition, all_delivered))
+        t = threading.Thread(target=thread_caminhao, args=(caminhao, centros, condition, all_delivered))
         threads.append(t)
         t.start()
 

@@ -1,61 +1,103 @@
 import pygame
+import threading
+from threads import Entradas
+from classes.encomenda import StatusEncomenda, Encomenda
+
+def localizar_encomenda(encomenda: Encomenda):
+	
+	if encomenda.status is StatusEncomenda.PRODUZIDA:
+		return f'<- Centro de Distribuicao {encomenda.origem}'
+
+	if encomenda.status is StatusEncomenda.ENTREGUE:
+		return f'-> Centro de Distribuicao {encomenda.destino}'
+	
+	if encomenda.status is StatusEncomenda.TRANSPORTE:
+		return f'-- Caminhao {encomenda.nome_caminhao}'
+	
+	if encomenda.status is StatusEncomenda.CARREGADA:
+		return f'-> Caminhao {encomenda.nome_caminhao}'
+	
+	if encomenda.status is StatusEncomenda.DESPACHE:
+		return f'<- Caminhao {encomenda.nome_caminhao}'
+	
+
 
 pygame.init()
 
-# define the RGB value for white,
-# green, blue colour .
-white = (255, 255, 255)
+# Cores em RGB
+white = (200, 200, 200)
 black = (0, 0, 0)
-green = (0, 255, 0)
+green = (0, 63, 0)
 blue = (0, 0, 128)
+brown = (60, 30, 0)
 
-# assigning values to X and Y variable
-X = 400
-Y = 400
+# Tamanho da tela
+X = 600
+Y = 600
 
-# create the display surface object
-# of specific dimension..e(X, Y).
+# Criacao da tela
 display_surface = pygame.display.set_mode((X, Y))
+pygame.display.set_caption('Tela de Acompanhamento')
 
-# set the pygame window name
-pygame.display.set_caption('Tela de Análise')
-
-# create a font object.
-# 1st parameter is the font file
-# which is present in pygame.
-# 2nd parameter is size of the font
+# Definicao de fonte e tamanho
 font = pygame.font.Font('freesansbold.ttf', 18)
 
-# create a text surface object,
-# on which text is drawn on it.
-text = font.render('Caminhão 1', True, black)
+# Escrita dos textos
 
-text1 = font.render('Caminhão 2', True, black)
+entrada = Entradas(3,4,100,5)
 
-# create a rectangular object for the
-# text surface object
-textRect = text.get_rect()
-text1Rect = text.get_rect()
+text_encomendas = [None for _ in range(entrada.P)]
 
-# set the center of the rectangular object.
-textRect.topleft = (10, X - 390)
-text1Rect.topleft = (10, X - 370)
+posicao_vertical_anterior = -1
+posicao_vertical = 0
+posicao_horizontal = 0
+
+encomenda = Encomenda(1,2,"Feijao", 7)
 
 # infinite loop
 while True:
 
+
 	# completely fill the surface object
 	# with white color
-	display_surface.fill(white)
+	display_surface.fill(brown)
 
 	# copying the text surface object
 	# to the display surface object
-	display_surface.blit(text, textRect)
-	display_surface.blit(text1, text1Rect)
+	if posicao_vertical<0:
+		posicao_vertical = 0
+
+	if posicao_horizontal>0:
+		posicao_horizontal = 0
+
+	for i in range(posicao_vertical, posicao_vertical+20):
+		if i < entrada.P:
+
+			if posicao_vertical != posicao_vertical_anterior:
+
+				extra = localizar_encomenda(encomenda)
+				text = font.render(f'Encomenda {i}:  {encomenda.status.value}    {extra}', True, white)
+				text_encomendas[i] = text
+			display_surface.blit(text_encomendas[i], (10 + posicao_horizontal * 50, 5 + (i-posicao_vertical)*30))
+	
 
 	# iterate over the list of Event objects
 	# that was returned by pygame.event.get() method.
+
 	for event in pygame.event.get():
+
+		if event.type == pygame.KEYDOWN:
+
+			if event.key == pygame.K_DOWN:
+				posicao_vertical_anterior = posicao_vertical
+				posicao_vertical += 1
+			if event.key == pygame.K_UP:
+				posicao_vertical_anterior = posicao_vertical
+				posicao_vertical -= 1
+			if event.key == pygame.K_LEFT:
+				posicao_horizontal +=1
+			if event.key == pygame.K_RIGHT:
+				posicao_horizontal -=1
 
 		# if event object type is QUIT
 		# then quitting the pygame

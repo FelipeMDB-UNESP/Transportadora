@@ -1,3 +1,13 @@
+from enum import Enum
+
+# Enumerator para a seleção do ambiente de execução do Usuário
+class StatusEncomenda(Enum):
+	PRODUZIDA = "[Produzida]"
+	CARREGADA = "[Carregada]"
+	TRANSPORTE = "[Transporte]"
+	DESPACHE = "[Despache]"
+	ENTREGUE = "[Entregue]"
+
 class Encomenda:
 
     def __init__(self, origem: str, destino: str, nome: str, id: int):
@@ -10,9 +20,11 @@ class Encomenda:
         self.horario_producao = None                        #horario de chegada à origem
         self.horario_carregamento = None                    #horario de carregamento da encomenda no caminhao        
         self.horario_despacho = None                        #horario de descarregamento da encomenda no destino
+        self.status = StatusEncomenda.PRODUZIDA             #Status da encomenda
 
     def anotar_rastro(self):
 
+        self.status = StatusEncomenda.ENTREGUE
         trecho_producao = f'{self.horario_producao}ms'
         trecho_carregamento = f'{self.horario_carregamento}ms'
         trecho_despacho = f'{self.horario_despacho}ms'
